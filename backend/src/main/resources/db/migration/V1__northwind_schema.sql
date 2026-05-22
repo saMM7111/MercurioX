@@ -1,0 +1,4 @@
+-- Flyway baseline for an existing Northwind schema.
+-- Replace this file's contents with the Northwind DDL if you want
+-- Flyway to manage the full schema from scratch.
+-- Intentionally empty to avoid duplicating external SQL sources.

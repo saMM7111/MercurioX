@@ -1,0 +1,4 @@
+-- Placeholder for Northwind seed schema and data.
+-- Provide the Northwind SQL here before using docker-compose seeding.
+-- Suggested source: https://github.com/pthom/northwind_psql
+-- This file is intentionally empty to avoid copying external datasets.
