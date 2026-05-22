@@ -1,0 +1,24 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: northwind-backend
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:northwind}
+    username: ${POSTGRES_USER:northwind}
+    password: ${POSTGRES_PASSWORD:changeme}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+jwt:
+  secret: ${JWT_SECRET:change-me}
+  access-ttl-minutes: 15
+  refresh-ttl-days: 7
+  refresh-cookie-secure: false
