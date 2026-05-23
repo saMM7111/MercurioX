@@ -1,0 +1,71 @@
+:root {
+  --color-primary: hsl(220 90% 56%);
+  --color-primary-hover: hsl(220 90% 46%);
+  --color-surface: hsl(220 20% 10%);
+  --color-surface-raised: hsl(220 20% 14%);
+  --color-surface-elevated: hsl(220 20% 18%);
+  --color-text: hsl(220 15% 92%);
+  --color-muted: hsl(220 10% 55%);
+  --color-border: hsl(220 20% 25%);
+  --color-danger: hsl(0 84% 60%);
+  --color-success: hsl(142 71% 45%);
+  --color-warning: hsl(38 92% 50%);
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.3);
+  --shadow-modal: 0 8px 32px hsl(0 0% 0% / 0.5);
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: dark;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--color-surface);
+}
+
+#root {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  color: var(--color-text);
+}
+
+p {
+  margin: 0 0 1rem 0;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+}
