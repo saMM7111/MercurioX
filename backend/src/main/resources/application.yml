@@ -22,3 +22,6 @@ jwt:
   access-ttl-minutes: 15
   refresh-ttl-days: 7
   refresh-cookie-secure: false
+
+app:
+  seed-demo-users: false

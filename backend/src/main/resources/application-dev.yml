@@ -11,3 +11,7 @@ spring:
 logging:
   level:
     com.northwind: DEBUG
+
+app:
+  seed-demo-users: true
+  demo-password: Passw0rd!
