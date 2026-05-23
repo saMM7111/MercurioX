@@ -9,6 +9,7 @@ import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.cloud.gateway.route.builder.UriSpec;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.function.Function;
 
@@ -21,8 +22,8 @@ import java.util.function.Function;
 @Configuration
 public class RouteConfig {
 
-    private static final String BACKEND_URI = "http://localhost:8081";
-
+        @Value("${gateway.backend-uri:http://backend:8081}")
+        private String backendUri;
         private final RedisRateLimiter redisRateLimiter;
         private final KeyResolver userKeyResolver;
 
@@ -43,68 +44,68 @@ public class RouteConfig {
                 .route("auth-route", r -> r
                         .path("/api/auth/**")
                         .filters(rateLimitOnly())
-                        .uri(BACKEND_URI))
+                        .uri(backendUri))
 
                 // ── Products — read (ADMIN, MANAGER, VIEWER) ─
                 .route("products-read", r -> r
                         .path("/api/products/**")
                         .and().method("GET")
                         .filters(rateLimitAndRole("ADMIN", "MANAGER", "VIEWER"))
-                        .uri(BACKEND_URI))
+                        .uri(backendUri))
 
                 // ── Products — write (ADMIN, MANAGER) ────────
                 .route("products-write", r -> r
                         .path("/api/products/**")
                         .and().method("POST", "PUT", "PATCH")
                         .filters(rateLimitAndRole("ADMIN", "MANAGER"))
-                        .uri(BACKEND_URI))
+                        .uri(backendUri))
 
                 // ── Products — delete (ADMIN only) ───────────
                 .route("products-delete", r -> r
                         .path("/api/products/**")
                         .and().method("DELETE")
                         .filters(rateLimitAndRole("ADMIN"))
-                        .uri(BACKEND_URI))
+                        .uri(backendUri))
 
                 // ── Orders — read ────────────────────────────
                 .route("orders-read", r -> r
                         .path("/api/orders/**")
                         .and().method("GET")
                         .filters(rateLimitAndRole("ADMIN", "MANAGER", "VIEWER"))
-                        .uri(BACKEND_URI))
+                        .uri(backendUri))
 
                 // ── Orders — write ───────────────────────────
                 .route("orders-write", r -> r
                         .path("/api/orders/**")
                         .and().method("POST", "PUT", "PATCH", "DELETE")
                         .filters(rateLimitAndRole("ADMIN", "MANAGER"))
-                        .uri(BACKEND_URI))
+                        .uri(backendUri))
 
                 // ── Customers — read ─────────────────────────
                 .route("customers-read", r -> r
                         .path("/api/customers/**")
                         .and().method("GET")
                         .filters(rateLimitAndRole("ADMIN", "MANAGER", "VIEWER"))
-                        .uri(BACKEND_URI))
+                        .uri(backendUri))
 
                 // ── Customers — write ────────────────────────
                 .route("customers-write", r -> r
                         .path("/api/customers/**")
                         .and().method("POST", "PUT", "PATCH", "DELETE")
                         .filters(rateLimitAndRole("ADMIN", "MANAGER"))
-                        .uri(BACKEND_URI))
+                        .uri(backendUri))
 
                 // ── Employees (ADMIN, MANAGER only) ──────────
                 .route("employees-route", r -> r
                         .path("/api/employees/**")
                         .filters(rateLimitAndRole("ADMIN", "MANAGER"))
-                        .uri(BACKEND_URI))
+                        .uri(backendUri))
 
                 // ── Audit logs (ADMIN only) ──────────────────
                 .route("audit-logs-route", r -> r
                         .path("/api/audit-logs/**")
                         .filters(rateLimitAndRole("ADMIN"))
-                        .uri(BACKEND_URI))
+                        .uri(backendUri))
 
                 .build();
     }
