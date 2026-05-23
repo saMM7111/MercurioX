@@ -28,7 +28,9 @@ services:
     restart: unless-stopped
 
   backend:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
@@ -45,7 +47,9 @@ services:
     restart: unless-stopped
 
   gateway:
-    build: ./gateway
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
