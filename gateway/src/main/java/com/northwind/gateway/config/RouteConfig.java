@@ -6,10 +6,11 @@ import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.GatewayFilterSpec;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
+import org.springframework.cloud.gateway.route.builder.UriSpec;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Programmatic route definitions for the API Gateway.
@@ -108,13 +109,13 @@ public class RouteConfig {
                 .build();
     }
 
-        private Consumer<GatewayFilterSpec> rateLimitOnly() {
+        private Function<GatewayFilterSpec, UriSpec> rateLimitOnly() {
                 return f -> f.requestRateLimiter(c -> c
                                 .setRateLimiter(redisRateLimiter)
                                 .setKeyResolver(userKeyResolver));
         }
 
-        private Consumer<GatewayFilterSpec> rateLimitAndRole(String... roles) {
+        private Function<GatewayFilterSpec, UriSpec> rateLimitAndRole(String... roles) {
                 return f -> f.filter(new RoleAuthorizationFilter(roles))
                                 .requestRateLimiter(c -> c
                                                 .setRateLimiter(redisRateLimiter)
