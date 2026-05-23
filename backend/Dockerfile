@@ -5,10 +5,12 @@ COPY pom.xml ./
 COPY gateway/pom.xml gateway/pom.xml
 COPY backend/pom.xml backend/pom.xml
 
-RUN mvn -q -pl backend -am dependency:go-offline
+RUN mvn -q install -N
+
+RUN mvn -q -pl backend dependency:go-offline
 
 COPY backend/src backend/src
-RUN mvn -q -pl backend -am package -DskipTests
+RUN mvn -q -pl backend clean package -DskipTests
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app

@@ -9,6 +9,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init/northwind.sql:/docker-entrypoint-initdb.d/northwind.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-northwind} -d ${POSTGRES_DB:-northwind}"]
       interval: 10s
@@ -37,8 +38,16 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-northwind}
       POSTGRES_USER: ${POSTGRES_USER:-northwind}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
-      JWT_SECRET: ${JWT_SECRET:-change-me}
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-at-least-32-chars-secret}
       SPRING_PROFILES_ACTIVE: dev
+      APP_SEED_DEMO_USERS: "true"
+      APP_DEMO_PASSWORD: "Passw0rd!"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8081/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
     depends_on:
       postgres:
         condition: service_healthy
@@ -53,12 +62,13 @@ services:
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      JWT_SECRET: ${JWT_SECRET:-change-me}
+      BACKEND_URI: http://backend:8081
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-at-least-32-chars-secret}
     depends_on:
       redis:
         condition: service_healthy
       backend:
-        condition: service_started
+        condition: service_healthy
     ports:
       - "8080:8080"
     restart: unless-stopped

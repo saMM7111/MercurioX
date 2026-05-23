@@ -24,4 +24,5 @@ jwt:
   refresh-cookie-secure: false
 
 app:
-  seed-demo-users: false
+  seed-demo-users: true
+  demo-password: "Passw0rd!"
