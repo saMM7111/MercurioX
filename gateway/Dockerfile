@@ -10,7 +10,7 @@ RUN mvn -q install -N -DskipTests
 RUN mvn -q -pl gateway dependency:go-offline
 
 COPY gateway/src gateway/src
-RUN mvn -q -pl gateway package -DskipTests
+RUN mvn -q -pl gateway clean package -DskipTests
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app
