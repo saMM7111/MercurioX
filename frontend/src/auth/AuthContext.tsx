@@ -9,6 +9,13 @@ export interface User {
   role: Role;
 }
 
+type AuthPayload = {
+  userId: string;
+  username: string;
+  role: Role;
+  accessToken: string;
+};
+
 interface AuthContextType {
   user: User | null;
   accessToken: string | null;
@@ -20,27 +27,32 @@ interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Map the backend AuthResponse flat shape → our User type
+function mapAuthData(payload: AuthPayload): { user: User; token: string } {
+  return {
+    token: payload.accessToken,
+    user: { id: payload.userId, username: payload.username, role: payload.role },
+  };
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [accessTokenState, setAccessTokenState] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // On load, attempt to refresh token
     const initAuth = async () => {
       try {
         const { data } = await axiosInstance.post('/auth/refresh');
-        const token = data.data.accessToken;
-        setAccessTokenState(token);
-        setAccessToken(token);
-        
-        // Decoding JWT or using `/auth/me` to get user details would be ideal here.
-        // For now, assume backend returns user in AuthResponse or we extract it.
-        if (data.data.user) {
-          setUser(data.data.user);
+        const payload = data?.data as AuthPayload | undefined;
+        if (payload?.accessToken) {
+          const { token, user: u } = mapAuthData(payload);
+          setAccessTokenState(token);
+          setAccessToken(token);
+          setUser(u);
         }
-      } catch (err) {
-        console.error('Initial refresh failed', err);
+      } catch {
+        // No valid refresh token — user must log in
       } finally {
         setIsLoading(false);
       }
@@ -50,10 +62,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (credentials: any) => {
     const { data } = await axiosInstance.post('/auth/login', credentials);
-    const token = data.data.accessToken;
+    const payload = data?.data as AuthPayload | undefined;
+    if (!payload?.accessToken) {
+      throw new Error('Invalid auth response');
+    }
+    const { token, user: u } = mapAuthData(payload);
     setAccessTokenState(token);
     setAccessToken(token);
-    setUser(data.data.user);
+    setUser(u);
   };
 
   const logout = async () => {
