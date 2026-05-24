@@ -6,7 +6,7 @@ A full-stack Northwind database management application built with a production-g
 
 ## Architecture
 
-```
+```mermaid
 flowchart TB
 
     %% =========================
@@ -95,7 +95,7 @@ flowchart TB
 ## Request Flow
 
 ### Authenticated request
-```
+```mermaid
 sequenceDiagram
 
     participant Browser
@@ -125,7 +125,7 @@ sequenceDiagram
 ```
 
 ### Logout (token blacklisting)
-```
+```mermaid
 sequenceDiagram
 
     participant Browser
