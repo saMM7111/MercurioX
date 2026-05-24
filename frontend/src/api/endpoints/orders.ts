@@ -65,9 +65,17 @@ export interface CreateOrderRequest {
     details: CreateOrderDetailRequest[];
 }
 
-export const getOrders = async (params?: OrdersParams) => {
+export const getOrders = async (params?: OrdersParams): Promise<OrderResponse> => {
     const { data } = await axiosInstance.get('/orders', { params });
-    return data.data as OrderResponse;
+    const raw = data.data;
+    // Backend wraps pagination metadata inside a nested `page` object
+    return {
+        content: raw.content,
+        totalElements: raw.page?.totalElements ?? raw.totalElements ?? 0,
+        totalPages: raw.page?.totalPages ?? raw.totalPages ?? 0,
+        size: raw.page?.size ?? raw.size ?? 0,
+        number: raw.page?.number ?? raw.number ?? 0,
+    };
 };
 
 export const getOrderById = async (id: number) => {

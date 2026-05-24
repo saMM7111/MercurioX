@@ -27,9 +27,17 @@ export interface CustomersParams {
     size?: number;
 }
 
-export const getCustomers = async (params?: CustomersParams) => {
+export const getCustomers = async (params?: CustomersParams): Promise<CustomerResponse> => {
     const { data } = await axiosInstance.get('/customers', { params });
-    return data.data as CustomerResponse;
+    const raw = data.data;
+    // Backend wraps pagination metadata inside a nested `page` object
+    return {
+        content: raw.content,
+        totalElements: raw.page?.totalElements ?? raw.totalElements ?? 0,
+        totalPages: raw.page?.totalPages ?? raw.totalPages ?? 0,
+        size: raw.page?.size ?? raw.size ?? 0,
+        number: raw.page?.number ?? raw.number ?? 0,
+    };
 };
 
 export const getCustomerById = async (id: string) => {

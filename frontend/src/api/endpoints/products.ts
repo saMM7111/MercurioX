@@ -28,9 +28,16 @@ export interface ProductsParams {
     search?: string;
 }
 
-export const getProducts = async (params?: ProductsParams) => {
+export const getProducts = async (params?: ProductsParams): Promise<ProductResponse> => {
     const { data } = await axiosInstance.get('/products', { params });
-    return data.data as ProductResponse;
+    const raw = data.data;
+    return {
+        content: raw.content,
+        totalElements: raw.page?.totalElements ?? raw.totalElements ?? 0,
+        totalPages: raw.page?.totalPages ?? raw.totalPages ?? 0,
+        size: raw.page?.size ?? raw.size ?? 0,
+        number: raw.page?.number ?? raw.number ?? 0,
+    };
 };
 
 export const getLowStockProducts = async () => {
