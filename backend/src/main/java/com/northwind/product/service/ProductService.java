@@ -25,6 +25,7 @@ public class ProductService {
         this.productMapper = productMapper;
     }
 
+    @Transactional(readOnly = true)
     public Page<ProductResponse> getAll(Pageable pageable, Integer categoryId, String search) {
         Page<Product> page;
         if (search != null && !search.isBlank()) {
@@ -37,6 +38,7 @@ public class ProductService {
         return page.map(productMapper::toResponse);
     }
 
+    @Transactional(readOnly = true)
     public ProductResponse getById(Integer id) {
         return productMapper.toResponse(findEntity(id));
     }
@@ -52,7 +54,7 @@ public class ProductService {
     public ProductResponse create(CreateProductRequest request) {
         Product product = productMapper.toEntity(request);
         if (product.getDiscontinued() == null) {
-            product.setDiscontinued(false);
+            product.setDiscontinued(0);
         }
         return productMapper.toResponse(productRepository.save(product));
     }
@@ -69,7 +71,7 @@ public class ProductService {
     @Audited(action = "DELETE", entity = "Product")
     public void delete(Integer id) {
         Product existing = findEntity(id);
-        existing.setDiscontinued(true);
+        existing.setDiscontinued(1);
         productRepository.save(existing);
     }
 

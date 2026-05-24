@@ -57,11 +57,17 @@ public class AuditLoggingAspect {
     }
 
     private String resolveEntityId(Object result) {
-        if (result == null) {
-            return "";
-        }
+        if (result == null) return "";
         try {
-            return objectMapper.readTree(serialize(result)).path("id").asText("");
+            com.fasterxml.jackson.databind.JsonNode node =
+                    objectMapper.readTree(serialize(result));
+            // Try common id field names
+            for (String field : new String[]{"id", "productId", "orderId",
+                    "customerId", "employeeId"}) {
+                String val = node.path(field).asText("");
+                if (!val.isEmpty()) return val;
+            }
+            return "";
         } catch (Exception ex) {
             return "";
         }

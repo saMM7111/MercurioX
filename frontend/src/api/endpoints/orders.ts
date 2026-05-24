@@ -1,46 +1,81 @@
 import { axiosInstance } from '../axiosInstance';
 
+export interface OrderDetail {
+    productId: number;
+    unitPrice: number;
+    quantity: number;
+    discount: number;
+}
+
 export interface Order {
-  id: number;
-  customerId: string;
-  employeeId: number;
-  orderDate: string;
-  requiredDate?: string;
-  shippedDate?: string;
-  shipVia?: number;
-  freight?: number;
-  shipName?: string;
-  shipAddress?: string;
-  shipCity?: string;
-  shipRegion?: string;
-  shipPostalCode?: string;
-  shipCountry?: string;
-  totalAmount?: number;
-  status?: string; // e.g., 'Pending', 'Shipped', 'Delivered'
+    orderId: number;          // matches backend OrderResponse field name
+    customerId: string;
+    employeeId?: number;
+    orderDate?: string;
+    requiredDate?: string;
+    shippedDate?: string;
+    shipVia?: number;
+    freight?: number;
+    shipName?: string;
+    shipAddress?: string;
+    shipCity?: string;
+    shipRegion?: string;
+    shipPostalCode?: string;
+    shipCountry?: string;
+    details: OrderDetail[];
 }
 
 export interface OrderResponse {
-  content: Order[];
-  totalElements: number;
-  totalPages: number;
-  size: number;
-  number: number;
+    content: Order[];
+    totalElements: number;
+    totalPages: number;
+    size: number;
+    number: number;
 }
 
 export interface OrdersParams {
-  page?: number;
-  size?: number;
-  startDate?: string;
-  endDate?: string;
-  customerId?: string;
+    page?: number;
+    size?: number;
+    customerId?: string;
+    startDate?: string;
+    endDate?: string;
+}
+
+export interface CreateOrderDetailRequest {
+    productId: number;
+    unitPrice: number;
+    quantity: number;
+    discount?: number;
+}
+
+export interface CreateOrderRequest {
+    customerId: string;
+    employeeId?: number;
+    orderDate?: string;
+    requiredDate?: string;
+    shippedDate?: string;
+    shipVia?: number;
+    freight?: number;
+    shipName?: string;
+    shipAddress?: string;
+    shipCity?: string;
+    shipRegion?: string;
+    shipPostalCode?: string;
+    shipCountry?: string;
+    details: CreateOrderDetailRequest[];
 }
 
 export const getOrders = async (params?: OrdersParams) => {
-  const { data } = await axiosInstance.get('/orders', { params });
-  return data.data as OrderResponse;
+    const { data } = await axiosInstance.get('/orders', { params });
+    return data.data as OrderResponse;
 };
 
-export const getOrderStats = async () => {
-  const { data } = await axiosInstance.get('/orders/stats');
-  return data.data; // generic stats object
+export const getOrderById = async (id: number) => {
+    const { data } = await axiosInstance.get(`/orders/${id}`);
+    return data.data as Order;
+};
+
+export const createOrder = async (request: CreateOrderRequest) => {
+    const { data } = await axiosInstance.post('/orders', request);
+    return data.data as Order;
 };

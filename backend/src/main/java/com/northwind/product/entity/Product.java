@@ -1,11 +1,7 @@
 package com.northwind.product.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 
 @Entity
@@ -13,7 +9,8 @@ import java.math.BigDecimal;
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "products_seq")
+    @SequenceGenerator(name = "products_seq", sequenceName = "products_product_id_seq", allocationSize = 1)
     @Column(name = "product_id")
     private Integer productId;
 
@@ -42,7 +39,7 @@ public class Product {
     private Integer reorderLevel;
 
     @Column(name = "discontinued")
-    private Boolean discontinued;
+    private Integer discontinued;
 
     public Integer getProductId() {
         return productId;
@@ -116,11 +113,11 @@ public class Product {
         this.reorderLevel = reorderLevel;
     }
 
-    public Boolean getDiscontinued() {
+    public Integer getDiscontinued() {
         return discontinued;
     }
 
-    public void setDiscontinued(Boolean discontinued) {
+    public void setDiscontinued(Integer discontinued) {
         this.discontinued = discontinued;
     }
 }

@@ -41,6 +41,7 @@ public class OrderService {
         this.eventPublisher = eventPublisher;
     }
 
+    @Transactional(readOnly = true)
     public Page<OrderResponse> getAll(Pageable pageable, String customerId, Instant startDate, Instant endDate) {
         Page<Order> page;
         if (customerId != null && !customerId.isBlank()) {
@@ -53,6 +54,7 @@ public class OrderService {
         return page.map(orderMapper::toResponse);
     }
 
+    @Transactional(readOnly = true)
     public OrderResponse getById(Integer id) {
         return orderMapper.toResponse(findEntity(id));
     }

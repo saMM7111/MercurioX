@@ -4,6 +4,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.Type;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -26,9 +28,11 @@ public class AuditLog {
     @Column(name = "action", nullable = false, length = 50)
     private String action;
 
+    @Type(JsonbType.class)
     @Column(name = "old_value", columnDefinition = "jsonb")
     private String oldValue;
 
+    @Type(JsonbType.class)
     @Column(name = "new_value", columnDefinition = "jsonb")
     private String newValue;
 
