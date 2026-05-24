@@ -47,9 +47,17 @@ export interface EmployeePageResponse {
     number: number;
 }
 
-const getEmployees = async (params?: { page?: number; size?: number }) => {
-    const { data } = await axiosInstance.get('/employees', { params });
-    return data.data as EmployeePageResponse;
+const getEmployees = async (params?: { page?: number; size?: number }): Promise<EmployeePageResponse> => {
+    const { data } = await axiosInstance.get("/employees", { params });
+    const raw = data.data;
+    const meta = raw.page ?? {};
+    return {
+        content: raw.content,
+        totalElements: meta.totalElements ?? raw.totalElements ?? 0,
+        totalPages: meta.totalPages ?? raw.totalPages ?? 0,
+        size: meta.size ?? raw.size ?? 0,
+        number: meta.number ?? raw.number ?? 0,
+    };
 };
 
 const getEmployeeById = async (id: number) => {

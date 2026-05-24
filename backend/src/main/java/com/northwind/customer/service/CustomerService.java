@@ -1,6 +1,7 @@
 package com.northwind.customer.service;
 
 import com.northwind.common.exception.ResourceNotFoundException;
+import com.northwind.customer.dto.CreateCustomerRequest;
 import com.northwind.customer.dto.CustomerResponse;
 import com.northwind.customer.entity.Customer;
 import com.northwind.customer.mapper.CustomerMapper;
@@ -8,6 +9,7 @@ import com.northwind.customer.repository.CustomerRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CustomerService {
@@ -28,5 +30,15 @@ public class CustomerService {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
         return customerMapper.toResponse(customer);
+    }
+
+    @Transactional
+    public CustomerResponse create(CreateCustomerRequest request) {
+        if (customerRepository.existsById(request.customerId())) {
+            throw new IllegalArgumentException(
+                    "Customer ID '" + request.customerId() + "' already exists");
+        }
+        Customer customer = customerMapper.toEntity(request);
+        return customerMapper.toResponse(customerRepository.save(customer));
     }
 }

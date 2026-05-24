@@ -14,6 +14,13 @@ export interface Customer {
     fax?: string;
 }
 
+export interface PageMeta {
+    size: number;
+    number: number;
+    totalElements: number;
+    totalPages: number;
+}
+
 export interface CustomerResponse {
     content: Customer[];
     totalElements: number;
@@ -27,20 +34,40 @@ export interface CustomersParams {
     size?: number;
 }
 
+export interface CreateCustomerRequest {
+    customerId: string;
+    companyName: string;
+    contactName?: string;
+    contactTitle?: string;
+    address?: string;
+    city?: string;
+    region?: string;
+    postalCode?: string;
+    country?: string;
+    phone?: string;
+    fax?: string;
+}
+
 export const getCustomers = async (params?: CustomersParams): Promise<CustomerResponse> => {
     const { data } = await axiosInstance.get('/customers', { params });
     const raw = data.data;
-    // Backend wraps pagination metadata inside a nested `page` object
+    // Backend returns pagination metadata inside a nested `page` object
+    const meta: PageMeta = raw.page ?? {};
     return {
         content: raw.content,
-        totalElements: raw.page?.totalElements ?? raw.totalElements ?? 0,
-        totalPages: raw.page?.totalPages ?? raw.totalPages ?? 0,
-        size: raw.page?.size ?? raw.size ?? 0,
-        number: raw.page?.number ?? raw.number ?? 0,
+        totalElements: meta.totalElements ?? 0,
+        totalPages: meta.totalPages ?? 0,
+        size: meta.size ?? 0,
+        number: meta.number ?? 0,
     };
 };
 
 export const getCustomerById = async (id: string) => {
     const { data } = await axiosInstance.get(`/customers/${id}`);
+    return data.data as Customer;
+};
+
+export const createCustomer = async (request: CreateCustomerRequest) => {
+    const { data } = await axiosInstance.post('/customers', request);
     return data.data as Customer;
 };

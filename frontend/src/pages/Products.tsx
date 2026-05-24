@@ -63,6 +63,11 @@ export const Products: React.FC = () => {
         );
     };
 
+    const handleToggleDiscontinued = () => {
+        if (!editingProduct) return;
+        setEditingProduct({ ...editingProduct, discontinued: !editingProduct.discontinued });
+    };
+
     const handleAddSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
@@ -209,6 +214,29 @@ export const Products: React.FC = () => {
                                 <Input id="edit-reorderLevel" name="reorderLevel" type="number" min="0" defaultValue={editingProduct.reorderLevel} required />
                             </div>
                         </div>
+
+                        {/* Status toggle */}
+                        <div className="form-group">
+                            <label>Status</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.4rem' }}>
+                                <span style={{
+                                    fontSize: '0.875rem',
+                                    fontWeight: 500,
+                                    color: editingProduct.discontinued ? 'var(--color-danger)' : 'var(--color-success, #22c55e)',
+                                }}>
+                                    {editingProduct.discontinued ? 'Discontinued' : 'Active'}
+                                </span>
+                                <Button
+                                    type="button"
+                                    variant={editingProduct.discontinued ? 'primary' : 'danger'}
+                                    size="sm"
+                                    onClick={handleToggleDiscontinued}
+                                >
+                                    {editingProduct.discontinued ? 'Mark as Active' : 'Discontinue'}
+                                </Button>
+                            </div>
+                        </div>
+
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '2rem' }}>
                             <Button type="button" variant="ghost" onClick={() => setEditingProduct(null)}>Cancel</Button>
                             <Button type="submit" disabled={updateMutation.isPending}>
