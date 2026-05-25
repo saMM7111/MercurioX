@@ -32,30 +32,117 @@ const ENTITY_LABELS: Record<string, string> = {
     Order: '🛒 Order',
 };
 
-function JsonViewer({ raw }: { raw: string | null | undefined }) {
-    if (!raw) return <span style={{ color: 'var(--color-muted)' }}>—</span>;
+const FIELD_LABELS: Record<string, string> = {
+    productId: 'Product ID',
+    productName: 'Product Name',
+    unitPrice: 'Unit Price',
+    unitsInStock: 'Units In Stock',
+    unitsOnOrder: 'Units On Order',
+    reorderLevel: 'Reorder Level',
+    discontinued: 'Status',
+    categoryId: 'Category ID',
+    supplierId: 'Supplier ID',
+    quantityPerUnit: 'Quantity Per Unit',
+    employeeId: 'Employee ID',
+    firstName: 'First Name',
+    lastName: 'Last Name',
+    title: 'Title',
+    titleOfCourtesy: 'Courtesy',
+    city: 'City',
+    country: 'Country',
+    homePhone: 'Phone',
+    hireDate: 'Hire Date',
+    birthDate: 'Birth Date',
+    reportsTo: 'Reports To',
+    customerId: 'Customer ID',
+    companyName: 'Company Name',
+    contactName: 'Contact Name',
+    contactTitle: 'Contact Title',
+    address: 'Address',
+    region: 'Region',
+    postalCode: 'Postal Code',
+    phone: 'Phone',
+    fax: 'Fax',
+    orderId: 'Order ID',
+    orderDate: 'Order Date',
+    shipName: 'Ship Name',
+    shipCity: 'Ship City',
+    shipCountry: 'Ship Country',
+};
+
+function formatValue(key: string, value: unknown): string {
+    if (value === null || value === undefined) return '—';
+    if (key === 'discontinued') return value ? 'Discontinued' : 'Active';
+    if (key === 'unitPrice') return `$${Number(value).toFixed(2)}`;
+    if ((key === 'hireDate' || key === 'birthDate' || key === 'orderDate') && value) {
+        return new Date(value as string).toLocaleDateString();
+    }
+    return String(value);
+}
+
+function JsonViewer({ raw, label, color }: { raw: string | null | undefined; label: string; color: string }) {
+    if (!raw) return null;
+
+    let parsed: Record<string, unknown> | null = null;
     try {
-        const parsed = JSON.parse(raw);
-        return (
-            <pre style={{
+        parsed = JSON.parse(raw);
+    } catch {
+        return null;
+    }
+
+    const entries = Object.entries(parsed ?? {}).filter(
+        ([key, val]) => val !== null && val !== undefined && key !== 'notes' && key !== 'photoPath'
+    );
+
+    if (entries.length === 0) return null;
+
+    return (
+        <div>
+            <p style={{
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                color,
+                marginBottom: '0.5rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+            }}>
+                {label}
+            </p>
+            <div style={{
                 backgroundColor: 'var(--color-surface-elevated)',
                 borderRadius: 'var(--radius-md)',
-                padding: '0.75rem',
-                fontSize: '0.75rem',
-                overflowX: 'auto',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-all',
-                maxHeight: '300px',
-                overflowY: 'auto',
-                margin: 0,
-                color: 'var(--color-text)',
+                padding: '0.75rem 1rem',
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '0.6rem 1.5rem',
             }}>
-                {JSON.stringify(parsed, null, 2)}
-            </pre>
-        );
-    } catch {
-        return <span style={{ fontSize: '0.75rem', color: 'var(--color-muted)' }}>{raw}</span>;
-    }
+                {entries.map(([key, val]) => (
+                    <div key={key}>
+                        <p style={{
+                            fontSize: '0.65rem',
+                            color: 'var(--color-muted)',
+                            marginBottom: '0.1rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em',
+                            margin: 0,
+                        }}>
+                            {FIELD_LABELS[key] ?? key}
+                        </p>
+                        <p style={{
+                            fontSize: '0.82rem',
+                            fontWeight: 500,
+                            margin: 0,
+                            color: key === 'discontinued'
+                                ? (val ? 'var(--color-danger)' : 'var(--color-success)')
+                                : 'var(--color-text)',
+                        }}>
+                            {formatValue(key, val)}
+                        </p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
 }
 
 function resolveLabel(log: AuditLog): string {
@@ -96,7 +183,6 @@ export const AuditLogs: React.FC = () => {
         size: pagination.pageSize,
     });
 
-    // Client-side filter on top of paginated results
     const filtered = (data?.content ?? []).filter((log: AuditLog) => {
         if (entityFilter !== 'All' && log.entityType !== entityFilter) return false;
         if (actionFilter !== 'All' && log.action !== actionFilter) return false;
@@ -132,11 +218,7 @@ export const AuditLogs: React.FC = () => {
             cell: (info) => {
                 const type = info.getValue();
                 return (
-                    <span style={{
-                        fontSize: '0.8rem',
-                        fontWeight: 600,
-                        color: 'var(--color-text)',
-                    }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text)' }}>
                         {ENTITY_LABELS[type] ?? type}
                     </span>
                 );
@@ -203,7 +285,6 @@ export const AuditLogs: React.FC = () => {
 
     return (
         <div>
-            {/* Header */}
             <div style={{ marginBottom: '2rem' }}>
                 <h1 style={{ fontSize: '1.5rem', fontWeight: 600 }}>Audit Logs</h1>
                 <p style={{ color: 'var(--color-muted)' }}>
@@ -211,7 +292,6 @@ export const AuditLogs: React.FC = () => {
                 </p>
             </div>
 
-            {/* Summary cards */}
             <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
@@ -232,9 +312,7 @@ export const AuditLogs: React.FC = () => {
             </div>
 
             <Card>
-                {/* Filters */}
                 <div style={{ marginBottom: '1.25rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center' }}>
-                    {/* Entity filter pills */}
                     <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
                         {ENTITY_TYPES.map((e) => (
                             <button
@@ -247,7 +325,6 @@ export const AuditLogs: React.FC = () => {
                         ))}
                     </div>
 
-                    {/* Action filter pills */}
                     <div style={{ display: 'flex', gap: '0.4rem' }}>
                         {ACTION_TYPES.map((a) => (
                             <button
@@ -260,7 +337,6 @@ export const AuditLogs: React.FC = () => {
                         ))}
                     </div>
 
-                    {/* Entity ID search */}
                     <Input
                         placeholder="Search by entity ID…"
                         value={searchId}
@@ -279,7 +355,6 @@ export const AuditLogs: React.FC = () => {
                 />
             </Card>
 
-            {/* Detail modal */}
             {selectedLog && (
                 <Modal
                     isOpen={true}
@@ -312,39 +387,17 @@ export const AuditLogs: React.FC = () => {
                             ))}
                         </div>
 
-                        {/* New value payload */}
-                        {selectedLog.newValue && (
-                            <div>
-                                <p style={{
-                                    fontSize: '0.75rem',
-                                    fontWeight: 600,
-                                    color: 'var(--color-success)',
-                                    marginBottom: '0.4rem',
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '0.05em',
-                                }}>
-                                    New Value
-                                </p>
-                                <JsonViewer raw={selectedLog.newValue} />
-                            </div>
-                        )}
+                        <JsonViewer
+                            raw={selectedLog.newValue}
+                            label="New Value"
+                            color="var(--color-success)"
+                        />
 
-                        {/* Old value payload */}
-                        {selectedLog.oldValue && (
-                            <div>
-                                <p style={{
-                                    fontSize: '0.75rem',
-                                    fontWeight: 600,
-                                    color: 'var(--color-danger)',
-                                    marginBottom: '0.4rem',
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '0.05em',
-                                }}>
-                                    Previous Value
-                                </p>
-                                <JsonViewer raw={selectedLog.oldValue} />
-                            </div>
-                        )}
+                        <JsonViewer
+                            raw={selectedLog.oldValue}
+                            label="Previous Value"
+                            color="var(--color-danger)"
+                        />
 
                         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
                             <Button variant="ghost" onClick={() => setSelectedLog(null)}>Close</Button>

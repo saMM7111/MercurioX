@@ -1,8 +1,8 @@
 package com.northwind.common.audit;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -27,17 +27,24 @@ public class AuditLoggingAspect {
 
     @Around("@annotation(audited)")
     public Object logAround(ProceedingJoinPoint joinPoint, Audited audited) throws Throwable {
+        Object[] args = joinPoint.getArgs(); // capture args BEFORE proceeding
         Object result = joinPoint.proceed();
-        persistLogAsync(audited, result);
+        persistLogAsync(audited, result, args);
         return result;
     }
 
     @Async
-    void persistLogAsync(Audited audited, Object result) {
+    void persistLogAsync(Audited audited, Object result, Object[] args) {
         AuditLog log = new AuditLog();
         log.setAction(audited.action());
         log.setEntityType(audited.entity());
-        log.setEntityId(resolveEntityId(result));
+
+        String entityId = resolveEntityId(result);
+        // For void methods (DELETE), fall back to first argument
+        if ((entityId == null || entityId.isEmpty()) && args != null && args.length > 0) {
+            entityId = String.valueOf(args[0]);
+        }
+        log.setEntityId(entityId);
         log.setNewValue(serialize(result));
         log.setUserId(resolveUserId().orElse(null));
         log.setRequestId(null);
@@ -59,18 +66,13 @@ public class AuditLoggingAspect {
     private String resolveEntityId(Object result) {
         if (result == null) return "";
         try {
-            JsonNode node = objectMapper.readTree(serialize(result));
-            // Priority-ordered list covering all audited entities:
-            // Employee, Customer, Product, Order
-            for (String field : new String[]{
-                    "employeeId", "customerId", "productId", "orderId", "id"}) {
-                JsonNode fieldNode = node.path(field);
-                if (!fieldNode.isMissingNode() && !fieldNode.isNull()) {
-                    String val = fieldNode.asText("");
-                    if (!val.isEmpty() && !val.equals("null")) {
-                        return val;
-                    }
-                }
+            com.fasterxml.jackson.databind.JsonNode node =
+                    objectMapper.readTree(serialize(result));
+            // Try common id field names
+            for (String field : new String[]{"id", "productId", "orderId",
+                    "customerId", "employeeId"}) {
+                String val = node.path(field).asText("");
+                if (!val.isEmpty()) return val;
             }
             return "";
         } catch (Exception ex) {

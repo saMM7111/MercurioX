@@ -69,7 +69,7 @@ public class ProductController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Void> delete(@PathVariable Integer id) {
-        productService.delete(id);
+        productService.delete(id); // returns ProductResponse internally, we discard it
         return ApiResponse.ok("Product deleted", null);
     }
 }

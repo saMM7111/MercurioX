@@ -69,10 +69,12 @@ public class ProductService {
 
     @Transactional
     @Audited(action = "DELETE", entity = "Product")
-    public void delete(Integer id) {
+    public ProductResponse delete(Integer id) {
         Product existing = findEntity(id);
+        ProductResponse snapshot = productMapper.toResponse(existing); // capture before change
         existing.setDiscontinued(1);
         productRepository.save(existing);
+        return snapshot; // aspect uses this to log name + entity ID
     }
 
     private Product findEntity(Integer id) {
