@@ -328,7 +328,6 @@ All services start in the correct order — Postgres first (health-checked), the
 |---------|-----|
 | Frontend | http://localhost:3000 |
 | API (via Gateway) | http://localhost:8080/api |
-| Swagger UI | http://localhost:8080/api-docs/swagger-ui.html |
 
 ### Demo credentials (auto-seeded)
 
