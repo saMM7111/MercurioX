@@ -7,10 +7,15 @@ COPY backend/pom.xml backend/pom.xml
 
 RUN mvn -q install -N -DskipTests
 
-RUN mvn -q -pl gateway dependency:go-offline
+# Cache the .m2 directory across builds
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -q -pl gateway dependency:go-offline
 
 COPY gateway/src gateway/src
-RUN mvn -q -pl gateway clean package -DskipTests
+
+# Reuse the same cache for the actual build
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -q -pl gateway clean package -DskipTests
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app
