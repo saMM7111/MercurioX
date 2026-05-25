@@ -6,7 +6,7 @@ server {
   index index.html;
 
   # Use Railway's internal DNS resolver; cache for 30s
-  resolver 127.0.0.11 valid=30s ipv6=off;
+  resolver 1.1.1.1 8.8.8.8 valid=30s ipv6=off;
 
   location /api/ {
       proxy_pass ${GATEWAY_URL};
