@@ -296,13 +296,15 @@ POSTGRES_PASSWORD=<your-db-password>
 ```env
 REDIS_HOST=redis.railway.internal
 REDIS_PORT=6379
-BACKEND_URI=http://backend.railway.internal:8081
+# Recommended: reference the backend service's runtime port
+BACKEND_URI=http://backend.railway.internal:${{ backend.PORT }}
 ```
 
 **frontend service variables**
 
 ```env
-GATEWAY_URL=http://gateway.railway.internal:8080
+# Recommended: reference the gateway service's runtime port
+GATEWAY_URL=http://gateway.railway.internal:${{ gateway.PORT }}
 ```
 
 ### 4) Deploy order
