@@ -1,8 +1,8 @@
 package com.northwind.common.audit;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -59,13 +59,18 @@ public class AuditLoggingAspect {
     private String resolveEntityId(Object result) {
         if (result == null) return "";
         try {
-            com.fasterxml.jackson.databind.JsonNode node =
-                    objectMapper.readTree(serialize(result));
-            // Try common id field names
-            for (String field : new String[]{"id", "productId", "orderId",
-                    "customerId", "employeeId"}) {
-                String val = node.path(field).asText("");
-                if (!val.isEmpty()) return val;
+            JsonNode node = objectMapper.readTree(serialize(result));
+            // Priority-ordered list covering all audited entities:
+            // Employee, Customer, Product, Order
+            for (String field : new String[]{
+                    "employeeId", "customerId", "productId", "orderId", "id"}) {
+                JsonNode fieldNode = node.path(field);
+                if (!fieldNode.isMissingNode() && !fieldNode.isNull()) {
+                    String val = fieldNode.asText("");
+                    if (!val.isEmpty() && !val.equals("null")) {
+                        return val;
+                    }
+                }
             }
             return "";
         } catch (Exception ex) {

@@ -1,5 +1,6 @@
 package com.northwind.customer.service;
 
+import com.northwind.common.audit.Audited;
 import com.northwind.common.exception.ResourceNotFoundException;
 import com.northwind.customer.dto.CreateCustomerRequest;
 import com.northwind.customer.dto.CustomerResponse;
@@ -33,6 +34,7 @@ public class CustomerService {
     }
 
     @Transactional
+    @Audited(action = "CREATE", entity = "Customer")
     public CustomerResponse create(CreateCustomerRequest request) {
         if (customerRepository.existsById(request.customerId())) {
             throw new IllegalArgumentException(

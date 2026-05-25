@@ -1,5 +1,6 @@
 package com.northwind.employee.service;
 
+import com.northwind.common.audit.Audited;
 import com.northwind.common.exception.ResourceNotFoundException;
 import com.northwind.employee.dto.CreateEmployeeRequest;
 import com.northwind.employee.dto.EmployeeResponse;
@@ -33,6 +34,7 @@ public class EmployeeService {
     }
 
     @Transactional
+    @Audited(action = "CREATE", entity = "Employee")
     public EmployeeResponse create(CreateEmployeeRequest request) {
         Employee employee = employeeMapper.toEntity(request);
 
