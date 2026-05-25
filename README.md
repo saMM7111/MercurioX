@@ -237,6 +237,87 @@ JWT_SECRET=your-very-long-secret-key-change-this-now
 docker-compose up --build
 ```
 
+---
+
+## Deploy to Railway
+
+This repo deploys cleanly to Railway as a multi-service project:
+
+- **postgres** (Railway PostgreSQL service)
+- **redis** (Railway Redis service)
+- **backend** (Spring Boot, Dockerfile)
+- **gateway** (Spring Cloud Gateway, Dockerfile)
+- **frontend** (Nginx serving Vite build + reverse proxy `/api` → gateway)
+
+### 1) Create the Railway project
+
+1. Create a new Railway project and connect this GitHub repo.
+2. Add 3 services from the repo:
+    - `backend` (root directory: `/`)
+    - `gateway` (root directory: `/`)
+    - `frontend` (root directory: `/`)
+3. Add 2 database services from Railway:
+    - PostgreSQL
+    - Redis
+
+Tip: rename the services to exactly `postgres`, `redis`, `backend`, `gateway`, `frontend` so private DNS names are predictable (`backend.railway.internal`, etc.).
+
+### 2) Configure each service (build + config path)
+
+Railway config paths in a monorepo must be **absolute**.
+
+- **backend**: set Railway Config Path to `/railway.backend.toml`
+- **gateway**: set Railway Config Path to `/railway.gateway.toml`
+- **frontend**: set Railway Config Path to `/railway.frontend.toml`
+
+### 3) Set environment variables
+
+Create a strong shared JWT secret and share it with **backend** and **gateway**.
+
+**Shared (recommended)**
+
+```env
+JWT_SECRET=change-me-to-a-32+-char-secret
+```
+
+**backend service variables**
+
+```env
+SPRING_PROFILES_ACTIVE=prod
+POSTGRES_HOST=postgres.railway.internal
+POSTGRES_PORT=5432
+POSTGRES_DB=<your-db-name>
+POSTGRES_USER=<your-db-user>
+POSTGRES_PASSWORD=<your-db-password>
+```
+
+**gateway service variables**
+
+```env
+REDIS_HOST=redis.railway.internal
+REDIS_PORT=6379
+BACKEND_URI=http://backend.railway.internal:8081
+```
+
+**frontend service variables**
+
+```env
+GATEWAY_URL=http://gateway.railway.internal:8080
+```
+
+### 4) Deploy order
+
+1. Deploy `postgres` and `redis` first.
+2. Deploy `backend` (it will run Flyway migrations).
+3. Deploy `gateway`.
+4. Deploy `frontend`.
+
+### 5) Access the app
+
+Use the **frontend** public domain URL from Railway.
+
+The frontend proxies `/api/*` to the gateway, so the browser stays **same-origin** and the httpOnly refresh cookie works.
+
 All services start in the correct order — Postgres first (health-checked), then Backend (health-checked), then Gateway, then Frontend.
 
 ### 4. Access
